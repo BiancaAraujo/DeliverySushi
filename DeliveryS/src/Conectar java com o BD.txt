@@ -1,0 +1,15 @@
+﻿-Para conectar o Banco de Dados no eclipse, vou passar alguns detalhes:
+
+- Coloquei no dropbox o arquivo mysql connector. 
+
+-Ele funciona para conectar com o mysql. Mas para usar com outro GBD, aí tem que achar outro arquivo para o GBD em específico.
+
+- 
+
+-É necessário extrair o arquivo. No eclipse, para conectar com o BD, é necessário clicar com o botão direito no ícone da pasta do projeto. 
+Clique em Build Path e em seguida em Configure Build Path. Clique na guia Libraries e no botão Add External JARs. 
+
+-Aí seleciona o mysql-connector-java-5.1.32-bin.jar que está dentro da pasta do pacote que extraímos.
+
+
+- Não sei se ficou muito claro, mas quem tiver alguma dúvida pode me perguntar depois :)
