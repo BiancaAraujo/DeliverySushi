@@ -110,6 +110,8 @@ public class JanelaCardapio extends JFrame implements ActionListener{
 	         return tarefasTable; 
 	         
         } catch (SQLException ex) {
+        	if(rs == NULL) //Kelly: eu não entendi direito qual o retorno da função do SQL, então, se não for assim, é só comentar esse if...eu acho :P
+        		JOptionPane.showMessageDialog(this, "O cardápio está vazio!");
             System.out.println("ERRO: " + ex);
         }
 		return null; 
