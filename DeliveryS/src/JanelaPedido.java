@@ -37,6 +37,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 	
 	// Fase 3 - Finalizar pedido
 	private JButton btEfetuar;
+	private	JTextField tfEntregador;
 	
 	// Fase 4 - Informar forma de pagamento
 	String pagamento = new String();
@@ -76,6 +77,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 		// Fase 3 - Finalizar pedido
 		btEfetuar = new JButton("Efetuar Pedido");
 		btEfetuar.addActionListener(this);
+		tfEntregador = new JTextField(20);
 		
 		// Fase 4 - Informar forma de pagamento
 		btConcluir = new JButton("Concluir pedido");
@@ -140,7 +142,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
    	    	// Remove "Efetuar", põe o valor total descontado, e põe o "Efetuar" de novo (pra ficar depois do novo valor total)
    	    	// FASE 3
    	    	container.remove(btEfetuar);
-   	    	container.add(new JLabel("Novo valor total: "+String.format("%.2f",valor)));   	    	
+   	    	container.add(new JLabel("Novo valor total: "+String.format("%.2f",valor)));  
    	    	container.add(btEfetuar);
 			container.revalidate();
 		}
@@ -168,6 +170,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 	        // Remover os dois botões e adicionar o "Concluir"
    	    	container.remove(btEfetuar);
    	    	container.remove(btDescontar);
+   	    	container.add(tfEntregador); 	    	
    	    	container.add(btConcluir);
 			container.revalidate();
 		}
@@ -177,6 +180,11 @@ public class JanelaPedido extends JFrame implements ActionListener{
 			if(pagamento.equals("")){
 				JOptionPane.showMessageDialog(container, "Escolha a forma de pagamento");
 			}
+
+			if(tfEntregador.getText().equals("")){
+				JOptionPane.showMessageDialog(container, "Entre com o nome do entregador!");
+			}
+
 			else{
 				// FAZER a finalização
 				/*
@@ -185,6 +193,27 @@ public class JanelaPedido extends JFrame implements ActionListener{
 				 * Guardar no BD em Pedido as informações desse pedido
 				 * Guardar no BD em Lista_Item os itens comprados no pedido
 				 * */
+						initConexao();
+						String insert = "INSERT INTO Pedido (valor_total, forma_pagamento, entregador, status, cpf) VALUES (?, ?, ?, ?, ?)";
+						PreparedStatement ptStatement;
+						
+						try {
+							ptStatement = c.prepareStatement(insert);
+							ptStatement.setString(1, valorTotal);
+							ptStatement.setString(2, pagamento);
+							ptStatement.setString(3, tfEntregador.getText());
+							ptStatement.setString(4, 0); //0 = não pago/ 1= pago
+							ptStatement.setString(5, tfCpf.getText());
+
+							ptStatement.executeUpdate();
+							
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+				
+				JOptionPane.showMessageDialog(this, "Pedido realizado com sucesso!");
+
 			}
 		}
 	}
