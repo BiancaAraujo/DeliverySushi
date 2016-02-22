@@ -89,29 +89,33 @@ public class JanelaCardapio extends JFrame implements ActionListener{
         	 //Pesquisa no BD e monta tabela
         	 PreparedStatement ptStatement = c.prepareStatement(select);
 	         rs = ptStatement.executeQuery();			 
-	         while (rs.next()){	        	 
-	        	 linhas.add(new Object[]{rs.getString("Item_Cardapio.nome_item"),rs.getString("preco"),rs.getString("ingredientes"),rs.getString("pontos_fidelidade_item"),"0"}); 	           	
-	    	 }	         
-			 for (Object[] linha : linhas) {  
-		         model.addRow(linha);  
-		     }
-			 
-			 //Ajusta altura da linha e colunas 0,1,2,3 como não editáveis
-			 final JTable tarefasTable = new JTable(){
-				 @Override
-				 public boolean isCellEditable(int row, int column) {
-					 return column == 4 ? true : false;
-				 }
-			 };			 
-			 tarefasTable.setRowHeight(25);	
-			 
-			 tarefasTable.setModel(model); 
-			 
-	         return tarefasTable; 
-	         
-        } catch (SQLException ex) {
         	if(rs == NULL) //Kelly: eu não entendi direito qual o retorno da função do SQL, então, se não for assim, é só comentar esse if...eu acho :P
         		JOptionPane.showMessageDialog(this, "O cardápio está vazio!");
+
+        	else
+        	{
+			         while (rs.next()){	        	 
+			        	 linhas.add(new Object[]{rs.getString("Item_Cardapio.nome_item"),rs.getString("preco"),rs.getString("ingredientes"),rs.getString("pontos_fidelidade_item"),"0"}); 	           	
+			    	 }	         
+					 for (Object[] linha : linhas) {  
+				         model.addRow(linha);  
+				     }
+					 
+					 //Ajusta altura da linha e colunas 0,1,2,3 como não editáveis
+					 final JTable tarefasTable = new JTable(){
+						 @Override
+						 public boolean isCellEditable(int row, int column) {
+							 return column == 4 ? true : false;
+						 }
+					 };			 
+					 tarefasTable.setRowHeight(25);	
+					 
+					 tarefasTable.setModel(model); 
+					 
+			         return tarefasTable;         		
+        	}
+	         
+        } catch (SQLException ex) {
             System.out.println("ERRO: " + ex);
         }
 		return null; 
