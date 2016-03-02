@@ -35,6 +35,8 @@ private void initConexao(){if(con == null){ con = new ConnectionFactory(); c = c
         
     	ResultSet rs = null;
     	ResultSet rs2 = null;
+    	ResultSet rs3 = null;
+    	ResultSet rs4 = null;
    
         public ButtonColumn(JTable table, int column, String tabela){  
             super();  
@@ -80,21 +82,59 @@ private void initConexao(){if(con == null){ con = new ConnectionFactory(); c = c
         }  
    
         public void actionPerformed(ActionEvent e){  
-        	if(metodo.equals("itemNaoPago")){
+        	if(metodo.equals("pedidosAbertos")){
         		fireEditingStopped();  
-                JanelaPagaItem janela = new JanelaPagaItem((String) table.getModel().getValueAt(table.getSelectedRow(), 4));
-        	}
-        	else if(metodo.equals("fonteNaoPaga")){
-        		fireEditingStopped();  
-                JanelaPagaFonte janela = new JanelaPagaFonte((String) table.getModel().getValueAt(table.getSelectedRow(), 4));
-        	}
-        	else if(metodo.equals("itemNaoRecebido")){
-        		fireEditingStopped();  
-                JanelaRecebeItem janela = new JanelaRecebeItem((String) table.getModel().getValueAt(table.getSelectedRow(), 3));
-        	}
-        	else if(metodo.equals("fonteNaoRecebida")){
-        		fireEditingStopped();  
-                JanelaRecebeFonte janela = new JanelaRecebeFonte((String) table.getModel().getValueAt(table.getSelectedRow(), 4));
+        		
+        		String code;
+        		float valor = 0;
+        		float valorAntigo = 0;
+        		
+        		code = (String) table.getModel().getValueAt(table.getSelectedRow(), 0);
+        		
+        		((DefaultTableModel) table.getModel()).removeRow(table.getSelectedRow()); 
+        		
+        		initConexao();
+        		
+        		
+				String select = "UPDATE Pedido SET status=? WHERE pedido_Id=?";
+				String select2 = "SELECT Pedido.pedido_Id, valor_total FROM Pedido WHERE pedido_Id=?";
+				String select3 = "SELECT Empresa.caixa FROM Empresa";
+				String select4 = "UPDATE Empresa SET caixa=?";
+			
+				
+
+				try {
+					PreparedStatement ptStatement = c.prepareStatement(select);
+					ptStatement.setString(1, "1");
+					ptStatement.setString(2, code);
+					ptStatement.executeUpdate();
+					
+					
+					PreparedStatement ptStatement2 = c.prepareStatement(select2);
+					ptStatement2.setString(1, code);
+			        rs2 = ptStatement2.executeQuery();
+			        
+			        while(rs2.next())
+			        {
+			        	valor = Float.parseFloat(rs2.getString("valor_total"));
+			        }
+			         
+			         PreparedStatement ptStatement3 = c.prepareStatement(select3);
+				     rs3 = ptStatement3.executeQuery();
+				     rs3.next();
+				     
+				     valorAntigo = Float.parseFloat(rs3.getString("caixa"));
+			         
+			         PreparedStatement ptStatement4 = c.prepareStatement(select4);
+						ptStatement4.setFloat(1, valor+valorAntigo);
+						ptStatement4.executeUpdate();
+			            
+					JOptionPane.showMessageDialog(editButton, this, "Pedido confirmado com sucesso!", 0);
+		        	} catch (SQLException ex) {
+		        		System.out.println("ERRO: " + ex);
+		        } 			
+        		
+                //ConfirmaPagamento janela = new ConfirmaPagamento((String) table.getModel().getValueAt(table.getSelectedRow(), 6));
         	}
         }  
     
