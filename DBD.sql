@@ -2,11 +2,11 @@ create schema DBD;
 use DBD;   
 
 create table Cliente(
-	cpf varchar(11) primary key,
+    cpf varchar(11) primary key,
     nome_cliente varchar(30),
     endereco varchar (80),      
     telefone varchar(8),
-    pontos_fedelidade int   
+    pontos_fidelidade int   
 ) engine=innodb;
 
 create table Pedido(
@@ -16,6 +16,8 @@ create table Pedido(
     entregador varchar(30),
     status varchar(10),
     cpf varchar(11),
+    pontos_ganhos int,
+    pontos_gastos int,
     foreign key (cpf) references Cliente(cpf)
 ) engine=innodb;
 
