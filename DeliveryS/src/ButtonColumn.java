@@ -37,6 +37,7 @@ private void initConexao(){if(con == null){ con = new ConnectionFactory(); c = c
     	ResultSet rs2 = null;
     	ResultSet rs3 = null;
     	ResultSet rs4 = null;
+    	ResultSet rs5 = null;
    
         public ButtonColumn(JTable table, int column, String tabela){  
             super();  
@@ -86,8 +87,12 @@ private void initConexao(){if(con == null){ con = new ConnectionFactory(); c = c
         		fireEditingStopped();  
         		
         		String code;
+        		String CPF = null;
         		float valor = 0;
         		float valorAntigo = 0;
+        		int ganhos = 0;
+        		int gastos = 0;
+        		int pontos = 0;
         		
         		code = (String) table.getModel().getValueAt(table.getSelectedRow(), 0);
         		
@@ -96,38 +101,75 @@ private void initConexao(){if(con == null){ con = new ConnectionFactory(); c = c
         		initConexao();
         		
         		
-				String select = "UPDATE Pedido SET status=? WHERE pedido_Id=?";
-				String select2 = "SELECT Pedido.pedido_Id, valor_total FROM Pedido WHERE pedido_Id=?";
-				String select3 = "SELECT Empresa.caixa FROM Empresa";
-				String select4 = "UPDATE Empresa SET caixa=?";
+				String update = "UPDATE Pedido SET status=? WHERE pedido_Id=?";
+				String select = "SELECT Pedido.pedido_Id, valor_total, cpf FROM Pedido WHERE pedido_Id=?";
+				String select2 = "SELECT Empresa.caixa FROM Empresa";
+				String update2 = "UPDATE Empresa SET caixa=?";
+				String select3 = "SELECT Pedido.pedido_Id, pontos_ganhos, pontos_gastos FROM Pedido WHERE pedido_Id=?";
+				String select4 = "SELECT Cliente.pontos_fidelidade FROM Cliente WHERE cpf=?";
+				String update3 = "UPDATE Cliente SET pontos_fidelidade=? WHERE cpf=?";
 			
 				
 
 				try {
-					PreparedStatement ptStatement = c.prepareStatement(select);
+					
+					// Atualiza o status do pedido para pago
+					PreparedStatement ptStatement = c.prepareStatement(update);
 					ptStatement.setString(1, "1");
 					ptStatement.setString(2, code);
 					ptStatement.executeUpdate();
 					
 					
-					PreparedStatement ptStatement2 = c.prepareStatement(select2);
+					// Atualiza o caixa da empresa com o valor do pedido pago
+					PreparedStatement ptStatement2 = c.prepareStatement(select);
 					ptStatement2.setString(1, code);
 			        rs2 = ptStatement2.executeQuery();
 			        
 			        while(rs2.next())
 			        {
 			        	valor = Float.parseFloat(rs2.getString("valor_total"));
+			        	CPF = rs2.getString("cpf");
 			        }
 			         
-			         PreparedStatement ptStatement3 = c.prepareStatement(select3);
+			         PreparedStatement ptStatement3 = c.prepareStatement(select2);
 				     rs3 = ptStatement3.executeQuery();
 				     rs3.next();
 				     
 				     valorAntigo = Float.parseFloat(rs3.getString("caixa"));
 			         
-			         PreparedStatement ptStatement4 = c.prepareStatement(select4);
+			         PreparedStatement ptStatement4 = c.prepareStatement(update2);
 						ptStatement4.setFloat(1, valor+valorAntigo);
 						ptStatement4.executeUpdate();
+						
+					// Atualiza os pontos fidelidade do cliente
+						PreparedStatement ptStatement5 = c.prepareStatement(select3);
+						ptStatement5.setString(1, code);
+				        rs4 = ptStatement5.executeQuery();
+				        
+				        while(rs4.next())
+				        {
+				        	gastos = Integer.parseInt(rs4.getString("pontos_gastos"));
+				        	ganhos = Integer.parseInt(rs4.getString("pontos_ganhos"));
+				        }
+				        
+				        System.out.println("Ganhos " + ganhos);
+				        System.out.println("Gastos " + gastos);
+				        
+				        PreparedStatement ptStatement6 = c.prepareStatement(select4);
+						ptStatement6.setString(1, CPF);
+				        rs5 = ptStatement6.executeQuery();
+				        
+				        while(rs5.next())
+				        {
+				        	pontos = Integer.parseInt(rs5.getString("pontos_fidelidade"));
+				        }
+				        
+				        System.out.println("Pontos " + pontos);
+				        
+				        PreparedStatement ptStatement7 = c.prepareStatement(update3);
+						ptStatement7.setFloat(1, pontos-gastos+ganhos);
+						ptStatement7.setString(2, CPF);
+						ptStatement7.executeUpdate();
 			            
 					JOptionPane.showMessageDialog(editButton, this, "Pedido confirmado com sucesso!", 0);
 		        	} catch (SQLException ex) {
