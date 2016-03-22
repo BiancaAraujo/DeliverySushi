@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -18,6 +19,8 @@ import javax.swing.JTextField;
 public class JanelaPedido extends JFrame implements ActionListener{
 	
 	private Container container;
+	
+	private int ganhos;
 	
 	// Fase 0 - Calcular o valor total do pedido
 	private JTable itensE;
@@ -107,6 +110,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 					// FASE 0
 					// Calcula o valor total que o cliente irá pagar no pedido
 					valorTotal = 0;
+					ganhos = 0;
 					calculaValorTotal(itensE);
 					calculaValorTotal(itensP);
 					calculaValorTotal(itensS);
@@ -121,7 +125,8 @@ public class JanelaPedido extends JFrame implements ActionListener{
 					container.add(new JLabel("Pontos de fidelidade disponíveis: "+pontos));
 					container.add(btEfetuar);
 					container.add(btDescontar);
-					container.revalidate();			
+					container.revalidate();	
+
 				}
 			}
 		}
@@ -138,6 +143,10 @@ public class JanelaPedido extends JFrame implements ActionListener{
    	    	// Desconta os pontos
    	    	// FAZER: ajustar fórmula (essa é 1 pra 1)
    	    	float valor = valorTotal - Float.parseFloat(pontosD);
+   	    	
+//   	    	pontosFidelidade[0] = pontosFidelidade[0] - Integer.parseInt(pontosD);
+//   	    	System.out.println("Teste... "+pontosFidelidade[0]);
+   	    	
    	    	
    	    	// Remove "Efetuar", põe o valor total descontado, e põe o "Efetuar" de novo (pra ficar depois do novo valor total)
    	    	// FASE 3
@@ -181,7 +190,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 				JOptionPane.showMessageDialog(container, "Escolha a forma de pagamento");
 			}
 
-			if(tfEntregador.getText().equals("")){
+			else if(tfEntregador.getText().equals("")){
 				JOptionPane.showMessageDialog(container, "Entre com o nome do entregador!");
 			}
 
@@ -194,23 +203,50 @@ public class JanelaPedido extends JFrame implements ActionListener{
 				 * Guardar no BD em Lista_Item os itens comprados no pedido
 				 * */
 						initConexao();
-						String insert = "INSERT INTO Pedido (valor_total, forma_pagamento, entregador, status, cpf) VALUES (?, ?, ?, ?, ?)";
+						String insert = "INSERT INTO Pedido (valor_total, forma_pagamento, entregador, status, cpf, pontos_ganhos, pontos_gastos) VALUES (?, ?, ?, ?, ?, ?, ?)";
+						String select = "SELECT Pedido.pedido_Id FROM Pedido WHERE cpf = ? and status = '0'";
+						String update = "UPDATE Lista_Item SET pedido_Id=? WHERE pedido_Id IS NULL";
+						ResultSet rs = null;
+						String code;
+						
 						PreparedStatement ptStatement;
+						PreparedStatement ptStatement2;
+						PreparedStatement ptStatement3;
+						
+						System.out.println("Ganhos "+ganhos);
+						System.out.println("Gastos "+Integer.parseInt(pontosD));
 						
 						try {
 							ptStatement = c.prepareStatement(insert);
-							ptStatement.setString(1, valorTotal);
+							ptStatement.setFloat(1, valorTotal);
 							ptStatement.setString(2, pagamento);
 							ptStatement.setString(3, tfEntregador.getText());
-							ptStatement.setString(4, 0); //0 = não pago/ 1= pago
+							ptStatement.setInt(4, 0); //0 = não pago/ 1= pago
 							ptStatement.setString(5, tfCpf.getText());
+							ptStatement.setInt(6, ganhos);
+							ptStatement.setInt(7, Integer.parseInt(pontosD));
 
 							ptStatement.executeUpdate();
+							
+							ptStatement2 = c.prepareStatement(select);
+							ptStatement2.setString(1, tfCpf.getText());
+							rs = ptStatement2.executeQuery();
+						    rs.next();
+						     
+						     code = rs.getString("pedido_Id");
+						     
+						     //System.out.println(":D " + code);
+						     
+						    ptStatement3 = c.prepareStatement(update);
+							ptStatement3.setString(1, code);
+							//ptStatement3.setString(2, code);
+							ptStatement3.executeUpdate();
 							
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
+						
 				
 				JOptionPane.showMessageDialog(this, "Pedido realizado com sucesso!");
 
@@ -221,10 +257,11 @@ public class JanelaPedido extends JFrame implements ActionListener{
 	// Essa função calcula preço total do pedido
 	private void calculaValorTotal(JTable itens) {
 		int linhas = itens.getRowCount(), i;
-		Object quant;		
-		
+		Object quant;
 		initConexao();
-		String select = "SELECT preco FROM Item_Cardapio WHERE nome_item = ?";
+		ResultSet rs2 = null;
+		String select = "SELECT preco, pontos_fidelidade_item FROM Item_Cardapio WHERE nome_item = ?";
+		String insert = "INSERT into Lista_Item (nome_item, quantidade) VALUES (?, ?)";
 		PreparedStatement ptStatement;
 		
 		try {
@@ -235,10 +272,41 @@ public class JanelaPedido extends JFrame implements ActionListener{
 					ptStatement.setString(1, itens.getValueAt(i, 0).toString());
 					rs = ptStatement.executeQuery();
 					rs.next();
-					valorTotal = valorTotal + Integer.parseInt(quant.toString()) * Float.parseFloat(rs.getString("preco"));				
-					
+					valorTotal = valorTotal + Integer.parseInt(quant.toString()) * Float.parseFloat(rs.getString("preco"));	
+					ganhos = Integer.parseInt(rs.getString("pontos_fidelidade_item")) + ganhos;
 				}				
 			}	
+			
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		PreparedStatement ptStatement2;
+		
+		try {
+						
+			ptStatement2 = c.prepareStatement(insert);
+			
+			for(i=0;i<linhas;i++){
+				quant = itens.getValueAt(i, 4);
+				if(Integer.parseInt(quant.toString()) > 0){
+					
+					System.out.println(itens.getValueAt(i, 0).toString());
+					
+					ptStatement2.setString(1, itens.getValueAt(i, 0).toString());
+					//ptStatement2.setString(2, "0");
+					ptStatement2.setInt(2, Integer.parseInt(quant.toString()));
+
+					ptStatement2.executeUpdate();
+					//rs2 = ptStatement2.executeQuery();
+					//rs2.next();
+					
+					/*rs = ptStatement.executeQuery();
+					rs.next();
+					valorTotal = valorTotal + Integer.parseInt(quant.toString()) * Float.parseFloat(rs.getString("preco"));		*/		
+				}	
+			}		
 			
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
@@ -249,7 +317,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 	// Essa função retorna quantos pontos de fidelidade o cliente tem; e -1 se não estiver cadastrado
 	private int cadastrado() {
 		initConexao();
-		String select = "SELECT pontos_fedelidade FROM Cliente WHERE cpf = ?";
+		String select = "SELECT pontos_fidelidade FROM Cliente WHERE cpf = ?";
 		PreparedStatement ptStatement;
 		
 		try {
@@ -262,7 +330,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 			if(rs.isAfterLast()){
 				return -1;
 			}
-			return Integer.parseInt(rs.getString("pontos_fedelidade"));
+			return Integer.parseInt(rs.getString("pontos_fidelidade"));
 			
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
@@ -273,4 +341,3 @@ public class JanelaPedido extends JFrame implements ActionListener{
 	}
 
 }
-
