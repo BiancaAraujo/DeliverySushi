@@ -35,7 +35,7 @@ public class JanelaPedido extends JFrame implements ActionListener{
 	private JButton btConfirmar;
 	
 	// Fase 2 - Utilizar pontos de fidelidade	
-	String pontosD;
+	String pontosD = "0";
 	private JButton btDescontar;
 	
 	// Fase 3 - Finalizar pedido
