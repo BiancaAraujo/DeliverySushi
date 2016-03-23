@@ -77,6 +77,8 @@ public class JanelaPagamento extends JFrame{
 	         
 	         else
 	         {	         
+	         	rs = ptStatement.executeQuery();
+	         	
 		         while (rs.next()){	        	 
 		        	 linhas.add(new Object[]{rs.getString("pedido_Id"), rs.getString("cpf"),rs.getString("valor_total"),rs.getString("forma_pagamento"),rs.getString("entregador"), rs.getString("status"), "Confirmar"}); 	           	
 		         }	     
