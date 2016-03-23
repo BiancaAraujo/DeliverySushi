@@ -12,6 +12,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -42,14 +43,18 @@ public class JanelaPagamento extends JFrame{
     	
     	container.add(new JLabel("Pedidos"));
 		pedidos = pedidosAbertos("SELECT Pedido.pedido_Id, cpf, valor_total, forma_pagamento, entregador, status FROM Pedido WHERE status = '0'");
+		
+		if(pedidos!=null){
+			
 		container.add(new JScrollPane(pedidos),BorderLayout.CENTER); 
 		
 		this.setLayout(new FlowLayout()); 
 		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		this.setVisible(true);
 		this.setTitle("Pagamento"); 
-		this.setSize(800,800);    
-
+		this.setSize(800,800);   
+		
+		}
     	
     }
     
@@ -64,23 +69,32 @@ public class JanelaPagamento extends JFrame{
 			 
         	 //Pesquisa no BD e monta tabela
         	 PreparedStatement ptStatement = c.prepareStatement(select);
-	         rs = ptStatement.executeQuery();			 
-	         while (rs.next()){	        	 
-	        	 linhas.add(new Object[]{rs.getString("pedido_Id"), rs.getString("cpf"),rs.getString("valor_total"),rs.getString("forma_pagamento"),rs.getString("entregador"), rs.getString("status"), "Confirmar"}); 	           	
-	         }	         
-			 for (Object[] linha : linhas) {  
-		         model.addRow(linha);  
-		     }
-			 
-			 final JTable tarefasTable = new JTable();
-			 
-			 tarefasTable.setModel(model); 
-			 tarefasTable.setFillsViewportHeight(true);
-			 
-			 ButtonColumn buttonColumn = new ButtonColumn(tarefasTable, 6, "pedidosAbertos");
-
-			 
-	         return tarefasTable; 
+	         rs = ptStatement.executeQuery();	
+	         
+	         if(!rs.next()) {
+        		 JOptionPane.showMessageDialog(this, "Não existem pedidos em aberto!"); 
+	         }
+	         
+	         else
+	         {	         
+		         while (rs.next()){	        	 
+		        	 linhas.add(new Object[]{rs.getString("pedido_Id"), rs.getString("cpf"),rs.getString("valor_total"),rs.getString("forma_pagamento"),rs.getString("entregador"), rs.getString("status"), "Confirmar"}); 	           	
+		         }	     
+		        
+		         
+				 for (Object[] linha : linhas) {  
+			         model.addRow(linha);  
+			     }
+				 
+				 final JTable tarefasTable = new JTable();
+				 
+				 tarefasTable.setModel(model); 
+				 tarefasTable.setFillsViewportHeight(true);
+				 
+				 ButtonColumn buttonColumn = new ButtonColumn(tarefasTable, 6, "pedidosAbertos");
+					
+		         return tarefasTable; 
+	         }
 	         
         } catch (SQLException ex) {
             System.out.println("ERRO: " + ex);
