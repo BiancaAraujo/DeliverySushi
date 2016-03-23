@@ -249,7 +249,8 @@ public class JanelaPedido extends JFrame implements ActionListener{
 						
 				
 				JOptionPane.showMessageDialog(this, "Pedido realizado com sucesso!");
-
+				
+				this.dispose();  
 			}
 		}
 	}
@@ -341,3 +342,4 @@ public class JanelaPedido extends JFrame implements ActionListener{
 	}
 
 }
+
