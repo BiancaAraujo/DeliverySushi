@@ -89,8 +89,9 @@ public class JanelaPedido extends JFrame implements ActionListener{
 		// Propriedades da janela
 		this.setLayout(new FlowLayout()); 
 		this.setVisible(true);
-		this.setTitle("Cadastro de pagamento de despesa"); 
-		this.setSize(800, 800);
+		this.setTitle("Pedido"); 
+		this.setSize(300, 100);
+		this.setLocationRelativeTo(null);
 	}
 
 
@@ -126,6 +127,8 @@ public class JanelaPedido extends JFrame implements ActionListener{
 					container.add(btEfetuar);
 					container.add(btDescontar);
 					container.revalidate();	
+					this.setSize(500, 150);
+					this.setLocationRelativeTo(null);
 
 				}
 			}
