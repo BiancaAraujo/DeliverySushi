@@ -171,7 +171,6 @@ private void initConexao(){if(con == null){ con = new ConnectionFactory(); c = c
 						ptStatement7.setString(2, CPF);
 						ptStatement7.executeUpdate();
 			            
-					JOptionPane.showMessageDialog(editButton, this, "Pedido confirmado com sucesso!", 0);
 		        	} catch (SQLException ex) {
 		        		System.out.println("ERRO: " + ex);
 		        } 			
