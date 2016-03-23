@@ -12,6 +12,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -89,13 +90,13 @@ public class JanelaCardapio extends JFrame implements ActionListener{
         	 //Pesquisa no BD e monta tabela
         	 PreparedStatement ptStatement = c.prepareStatement(select);
 	         rs = ptStatement.executeQuery();			 
-        	if(rs == NULL) //Kelly: eu não entendi direito qual o retorno da função do SQL, então, se não for assim, é só comentar esse if...eu acho :P
+        	if(rs == null) //Kelly: eu não entendi direito qual o retorno da função do SQL, então, se não for assim, é só comentar esse if...eu acho :P
         		JOptionPane.showMessageDialog(this, "O cardápio está vazio!");
 
         	else
         	{
 			         while (rs.next()){	        	 
-			        	 linhas.add(new Object[]{rs.getString("Item_Cardapio.nome_item"),rs.getString("preco"),rs.getString("ingredientes"),rs.getString("pontos_fidelidade_item"),"0"}); 	           	
+			        	 linhas.add(new Object[]{rs.getString("Item_Cardapio.nome_item"),rs.getString("preco"),rs.getString("ingredientes"),rs.getString("pontos_fidelidade_item"),"0"});
 			    	 }	         
 					 for (Object[] linha : linhas) {  
 				         model.addRow(linha);  
@@ -125,7 +126,8 @@ public class JanelaCardapio extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e){
 		if(e.getSource()==btPedir){
 			// Envia todas as tabelas do cardápio (para a janela seguinte contar quantos de cada iten foram pedidos)
-			JanelaPedido JPed = new JanelaPedido(itensEntrada,itensPrincipal,itensSobremesa,itensBebida);	
+			JanelaPedido JPed = new JanelaPedido(itensEntrada,itensPrincipal,itensSobremesa,itensBebida);
+			this.dispose();  
 		}		
 		else if (e.getSource()==btMaisPedidos){
 			//MaisPedidos mPed = new MaisPedidos();
